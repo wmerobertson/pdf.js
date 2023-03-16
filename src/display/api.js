@@ -321,6 +321,10 @@ function getDocument(src) {
   const disableStream = src.disableStream === true;
   const disableAutoFetch = src.disableAutoFetch === true;
   const pdfBug = src.pdfBug === true;
+  const maxGroupSize =
+    Number.isInteger(src.maxGroupSize) && src.maxGroupSize > 4096
+      ? src.maxGroupSize
+      : 4096;
 
   // Parameters whose default values depend on other parameters.
   const length = rangeTransport ? rangeTransport.length : src.length ?? NaN;
@@ -416,6 +420,7 @@ function getDocument(src) {
     disableAutoFetch,
     pdfBug,
     styleElement,
+    maxGroupSize,
   };
 
   worker.promise
@@ -1495,6 +1500,7 @@ class PDFPageProxy {
       useRequestAnimationFrame: !intentPrint,
       pdfBug: this._pdfBug,
       pageColors,
+      maxGroupSize: this._transport.loadingParams.maxGroupSize,
     });
 
     (intentState.renderTasks ||= new Set()).add(internalRenderTask);
@@ -3059,10 +3065,11 @@ class WorkerTransport {
   }
 
   get loadingParams() {
-    const { disableAutoFetch, enableXfa } = this._params;
+    const { disableAutoFetch, enableXfa, maxGroupSize } = this._params;
     return shadow(this, "loadingParams", {
       disableAutoFetch,
       enableXfa,
+      maxGroupSize,
     });
   }
 }
@@ -3227,6 +3234,7 @@ class InternalRenderTask {
     useRequestAnimationFrame = false,
     pdfBug = false,
     pageColors = null,
+    maxGroupSize,
   }) {
     this.callback = callback;
     this.params = params;
@@ -3240,6 +3248,7 @@ class InternalRenderTask {
     this.filterFactory = filterFactory;
     this._pdfBug = pdfBug;
     this.pageColors = pageColors;
+    this.maxGroupSize = maxGroupSize;
 
     this.running = false;
     this.graphicsReadyCallback = null;
@@ -3298,7 +3307,8 @@ class InternalRenderTask {
       isOffscreenCanvasSupported ? this.filterFactory : null,
       { optionalContentConfig },
       this.annotationCanvasMap,
-      this.pageColors
+      this.pageColors,
+      this.maxGroupSize
     );
     this.gfx.beginDrawing({
       transform,

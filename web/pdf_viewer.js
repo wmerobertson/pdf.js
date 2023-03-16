@@ -122,6 +122,7 @@ function isValidAnnotationEditorMode(mode) {
  * @property {Object} [pageColors] - Overwrites background and foreground colors
  *   with user defined ones in order to improve readability in high contrast
  *   mode.
+ * * @property {number} [maxGroupSize] - Max group size.
  */
 
 class PDFPageViewBuffer {
@@ -275,6 +276,7 @@ class PDFViewer {
     this.l10n = options.l10n || NullL10n;
     this.#enablePermissions = options.enablePermissions || false;
     this.pageColors = options.pageColors || null;
+    this.maxGroupSize = options.maxGroupSize;
 
     if (typeof PDFJSDev === "undefined" || !PDFJSDev.test("MOZCENTRAL")) {
       if (
@@ -786,6 +788,7 @@ class PDFViewer {
             pageColors: this.pageColors,
             l10n: this.l10n,
             layerProperties,
+            maxGroupSize: this.maxGroupSize,
           });
           this._pages.push(pageView);
         }
