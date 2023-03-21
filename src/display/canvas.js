@@ -1024,7 +1024,8 @@ class CanvasGraphics {
     filterFactory,
     { optionalContentConfig, markedContentStack = null },
     annotationCanvasMap,
-    pageColors
+    pageColors,
+    enableInterpolation
   ) {
     this.ctx = canvasCtx;
     this.current = new CanvasExtraState(
@@ -1062,6 +1063,7 @@ class CanvasGraphics {
     this.outputScaleY = 1;
     this.backgroundColor = pageColors?.background || null;
     this.foregroundColor = pageColors?.foreground || null;
+    this.enableInterpolation = enableInterpolation;
 
     this._cachedScaleForStroking = null;
     this._cachedGetSinglePixelWidth = null;
@@ -1465,7 +1467,7 @@ class CanvasGraphics {
 
     fillCtx.imageSmoothingEnabled = getImageSmoothingEnabled(
       getCurrentTransform(fillCtx),
-      img.interpolate
+      this.enableInterpolation ?? img.interpolate
     );
 
     drawImageAtIntegerCoords(
@@ -3107,7 +3109,7 @@ class CanvasGraphics {
     );
     ctx.imageSmoothingEnabled = getImageSmoothingEnabled(
       getCurrentTransform(ctx),
-      imgData.interpolate
+      this.enableInterpolation ?? imgData.interpolate
     );
 
     drawImageAtIntegerCoords(

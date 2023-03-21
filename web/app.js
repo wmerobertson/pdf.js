@@ -528,6 +528,7 @@ const PDFViewerApplication = {
       maxCanvasPixels: AppOptions.get("maxCanvasPixels"),
       enablePermissions: AppOptions.get("enablePermissions"),
       pageColors,
+      enableInterpolation: AppOptions.get("enableInterpolation"),
     });
     pdfRenderingQueue.setViewer(this.pdfViewer);
     pdfLinkService.setViewer(this.pdfViewer);
