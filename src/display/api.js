@@ -321,10 +321,7 @@ function getDocument(src) {
   const disableStream = src.disableStream === true;
   const disableAutoFetch = src.disableAutoFetch === true;
   const pdfBug = src.pdfBug === true;
-  const maxGroupSize =
-    Number.isInteger(src.maxGroupSize) && src.maxGroupSize > 4096
-      ? src.maxGroupSize
-      : 4096;
+  const enforceMaxGroupSize = src.enforceMaxGroupSize ?? true;
 
   // Parameters whose default values depend on other parameters.
   const length = rangeTransport ? rangeTransport.length : src.length ?? NaN;
@@ -420,7 +417,7 @@ function getDocument(src) {
     disableAutoFetch,
     pdfBug,
     styleElement,
-    maxGroupSize,
+    enforceMaxGroupSize,
   };
 
   worker.promise
@@ -1500,7 +1497,7 @@ class PDFPageProxy {
       useRequestAnimationFrame: !intentPrint,
       pdfBug: this._pdfBug,
       pageColors,
-      maxGroupSize: this._transport.loadingParams.maxGroupSize,
+      enforceMaxGroupSize: this._transport.loadingParams.enforceMaxGroupSize,
     });
 
     (intentState.renderTasks ||= new Set()).add(internalRenderTask);
@@ -3065,11 +3062,11 @@ class WorkerTransport {
   }
 
   get loadingParams() {
-    const { disableAutoFetch, enableXfa, maxGroupSize } = this._params;
+    const { disableAutoFetch, enableXfa, enforceMaxGroupSize } = this._params;
     return shadow(this, "loadingParams", {
       disableAutoFetch,
       enableXfa,
-      maxGroupSize,
+      enforceMaxGroupSize,
     });
   }
 }
@@ -3234,7 +3231,7 @@ class InternalRenderTask {
     useRequestAnimationFrame = false,
     pdfBug = false,
     pageColors = null,
-    maxGroupSize,
+    enforceMaxGroupSize,
   }) {
     this.callback = callback;
     this.params = params;
@@ -3248,7 +3245,7 @@ class InternalRenderTask {
     this.filterFactory = filterFactory;
     this._pdfBug = pdfBug;
     this.pageColors = pageColors;
-    this.maxGroupSize = maxGroupSize;
+    this.enforceMaxGroupSize = enforceMaxGroupSize;
 
     this.running = false;
     this.graphicsReadyCallback = null;
@@ -3308,7 +3305,7 @@ class InternalRenderTask {
       { optionalContentConfig },
       this.annotationCanvasMap,
       this.pageColors,
-      this.maxGroupSize
+      this.enforceMaxGroupSize
     );
     this.gfx.beginDrawing({
       transform,

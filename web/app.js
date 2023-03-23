@@ -528,7 +528,7 @@ const PDFViewerApplication = {
       maxCanvasPixels: AppOptions.get("maxCanvasPixels"),
       enablePermissions: AppOptions.get("enablePermissions"),
       pageColors,
-      maxGroupSize: AppOptions.get("maxGroupSize"),
+      enforceMaxGroupSize: AppOptions.get("enforceMaxGroupSize"),
     });
     pdfRenderingQueue.setViewer(this.pdfViewer);
     pdfLinkService.setViewer(this.pdfViewer);

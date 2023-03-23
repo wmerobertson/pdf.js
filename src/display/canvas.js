@@ -46,6 +46,7 @@ import { isNodeJS } from "../shared/is_node.js";
 const MIN_FONT_SIZE = 16;
 // Maximum font size that would be used during canvas fillText operations.
 const MAX_FONT_SIZE = 100;
+const MAX_GROUP_SIZE = 4096;
 
 // Defines the time the `executeOperatorList`-method is going to be executing
 // before it stops and schedules a continue of execution.
@@ -1024,7 +1025,7 @@ class CanvasGraphics {
     { optionalContentConfig, markedContentStack = null },
     annotationCanvasMap,
     pageColors,
-    maxGroupSize
+    enforceMaxGroupSize
   ) {
     this.ctx = canvasCtx;
     this.current = new CanvasExtraState(
@@ -1062,7 +1063,7 @@ class CanvasGraphics {
     this.outputScaleY = 1;
     this.backgroundColor = pageColors?.background || null;
     this.foregroundColor = pageColors?.foreground || null;
-    this.maxGroupSize = maxGroupSize;
+    this.enforceMaxGroupSize = enforceMaxGroupSize;
 
     this._cachedScaleForStroking = null;
     this._cachedGetSinglePixelWidth = null;
@@ -2699,14 +2700,15 @@ class CanvasGraphics {
     let scaleX = 1,
       scaleY = 1;
 
-    // TODO: just use a boolean to skip this?
-    if (drawnWidth > this.maxGroupSize) {
-      scaleX = drawnWidth / this.maxGroupSize;
-      drawnWidth = this.maxGroupSize;
-    }
-    if (drawnHeight > this.maxGroupSize) {
-      scaleY = drawnHeight / this.maxGroupSize;
-      drawnHeight = this.maxGroupSize;
+    if (this.enforceMaxGroupSize) {
+      if (drawnWidth > MAX_GROUP_SIZE) {
+        scaleX = drawnWidth / MAX_GROUP_SIZE;
+        drawnWidth = MAX_GROUP_SIZE;
+      }
+      if (drawnHeight > MAX_GROUP_SIZE) {
+        scaleY = drawnHeight / MAX_GROUP_SIZE;
+        drawnHeight = MAX_GROUP_SIZE;
+      }
     }
 
     this.current.startNewPathAndClipBox([0, 0, drawnWidth, drawnHeight]);
